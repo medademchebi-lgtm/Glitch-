@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#020805">
+<title>GLITCH // Cyber Quiz</title>
+<style>
+:root{--g:#42ff91;--g2:#1ca85a;--bg:#020805;--panel:#07150d;--muted:#9ac7a8;--red:#ff536b;--gold:#ffe66d}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(ellipse at top,#0b2a17 0%,#020805 60%);color:var(--g);font-family:Consolas,"Courier New",monospace;padding:18px;overflow-x:hidden}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background:repeating-linear-gradient(0deg,transparent 0 3px,rgba(66,255,145,.035) 4px)}
+.wrap{position:relative;z-index:1;max-width:760px;margin:auto}
+header{text-align:center;padding:14px 0 20px}
+.logo{font-size:clamp(38px,10vw,62px);font-weight:900;letter-spacing:7px;text-shadow:0 0 12px var(--g),0 0 32px #0d9d4b;animation:flicker 5s infinite}
+.subtitle{font-size:11px;letter-spacing:3px;color:#91dba9;margin-top:6px}
+.panel{border:1px solid var(--g2);background:rgba(4,17,9,.95);border-radius:10px;padding:clamp(16px,4vw,28px);box-shadow:0 0 28px #0b612a36}
+.row{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+.status{font-size:11px;color:#a2dcb4;margin-bottom:18px}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--g);box-shadow:0 0 12px var(--g);margin-left:7px}
+.pill{border:1px solid #246e40;border-radius:99px;padding:6px 10px;font-size:11px;color:#b3efc5}
+.progress{height:7px;background:#102a19;border-radius:20px;overflow:hidden;margin:12px 0 22px;border:1px solid #174e2c}
+#bar{height:100%;width:0;background:var(--g);box-shadow:0 0 12px var(--g);transition:width .35s}
+h2{font-size:clamp(17px,4vw,23px);line-height:1.6;margin:0 0 18px;color:#e0ffea}
+.answers{display:grid;gap:11px}
+.answer{width:100%;text-align:right;border:1px solid #236a3d;background:#061109;color:#c5f5d3;padding:14px;border-radius:7px;font:inherit;line-height:1.6;cursor:pointer;transition:transform .15s,border .15s,background .15s}
+.answer:active{transform:scale(.99)}
+.answer:hover:not(:disabled){border-color:var(--g);background:#0b2815}
+.answer.correct{border-color:var(--g);background:#0d4825;color:#fff;box-shadow:0 0 15px #20e56b38}
+.answer.wrong{border-color:var(--red);background:#40101a;color:#fff;animation:shake .25s}
+.answer:disabled{cursor:default}
+.feedback{min-height:48px;margin-top:16px;padding:12px;border:1px dashed #28683d;border-radius:7px;color:var(--muted);font-size:13px;line-height:1.8}
+.feedback.good{border-color:var(--g);color:var(--g)}
+.feedback.bad{border-color:var(--red);color:#ff9aa9}
+.controls{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+button.primary,button.secondary{flex:1;min-width:130px;border-radius:6px;padding:13px;font:inherit;font-weight:bold;cursor:pointer}
+.primary{background:#0b351b;border:1px solid var(--g);color:var(--g)}
+.secondary{background:transparent;border:1px solid #28683d;color:#a9e5bc}
+.primary:hover{background:var(--g);color:#031208}
+button:disabled{opacity:.35;cursor:not-allowed}
+.intro{text-align:center}
+.intro p,.note{font-size:13px;color:var(--muted);line-height:1.9}
+.bigicon{font-size:48px;margin:12px}
+.statgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}
+.stat{border:1px solid #1d5d34;padding:14px 8px;border-radius:7px;text-align:center}
+.stat strong{display:block;font-size:25px;margin-bottom:5px}
+.stat span{font-size:10px;color:var(--muted)}
+.hidden{display:none!important}
+#toast{position:fixed;top:14px;left:50%;transform:translateX(-50%) translateY(-140%);background:#0b321a;border:1px solid var(--g);color:var(--g);padding:10px 16px;border-radius:7px;z-index:10;transition:transform .25s;font-size:12px;max-width:90%;text-align:center}
+#toast.show{transform:translateX(-50%) translateY(0)}
+.flash{animation:flash .35s}
+footer{text-align:center;color:#39734c;font-size:10px;margin:18px 0 6px;letter-spacing:1px}
+
+.account-box{margin:18px 0;padding:16px;border:1px solid #246e40;border-radius:9px;background:linear-gradient(135deg,#07150d,#081d10);text-align:right}
+.account-title{font-size:13px;color:var(--g);letter-spacing:1px;margin-bottom:8px}
+.google-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px;border:1px solid #d7e2db;border-radius:7px;background:#f7faf8;color:#202722;font:600 14px Arial,sans-serif;cursor:pointer}
+.google-btn:active{transform:scale(.99)}
+.google-g{font-size:20px;font-weight:900;color:#4285f4;background:#fff;border-radius:4px;padding:1px 4px}
+.auth-hint{font-size:10px!important;color:#86aa91!important;line-height:1.7!important;margin-bottom:0}
+.profile-line{margin-top:10px;padding:9px;border:1px solid #246e40;border-radius:6px;color:#d8ffe4;font-size:12px;overflow-wrap:anywhere}
+
+@keyframes flicker{0%,96%,98%,100%{opacity:1}97%{opacity:.72}}
+@keyframes shake{25%{transform:translateX(4px)}75%{transform:translateX(-4px)}}
+@keyframes flash{0%{filter:brightness(1)}40%{filter:brightness(1.8)}100%{filter:brightness(1)}}
+@media(min-width:600px){.answers{grid-template-columns:1fr 1fr}.answer:last-child:nth-child(odd){grid-column:1/-1}}
+
+/* GLITCH // NEON VIOLET + CYAN UI */
+:root{--g:#b8a1ff;--g2:#5d4aa5;--bg:#070816;--panel:#11152a;--muted:#a8b0d0;--red:#fb7185;--gold:#67e8f9}
+body{background:radial-gradient(ellipse at 10% 0%,#241447 0%,transparent 42%),radial-gradient(ellipse at 95% 85%,#082a3a 0%,transparent 42%),#070816!important;color:#e9e9ff!important;font-family:system-ui,-apple-system,"Segoe UI",sans-serif!important}
+body:before{background:linear-gradient(rgba(167,139,250,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(34,211,238,.055) 1px,transparent 1px)!important;background-size:30px 30px!important}
+.logo{color:#e9ddff!important;letter-spacing:6px!important;text-shadow:0 0 12px #a78bfa,0 0 35px #7c3aed!important}
+.subtitle{color:#8cecff!important}
+.panel{background:linear-gradient(145deg,rgba(19,21,46,.97),rgba(9,12,29,.98))!important;border-color:#48416f!important;border-radius:18px!important;box-shadow:0 16px 42px #0007,0 0 25px #7c3aed16!important}
+.status,.pill{color:#c7c9f6!important}.pill{border-color:#49416e!important;background:#17152f}
+.dot{background:#67e8f9!important;box-shadow:0 0 12px #67e8f9!important}
+.progress{background:#20223e!important;border-color:#36345d!important}#bar{background:linear-gradient(90deg,#8b5cf6,#22d3ee)!important;box-shadow:0 0 14px #22d3ee77!important}
+h2{color:#f0edff!important}
+.answer{background:linear-gradient(120deg,#171832,#10182a)!important;border-color:#373a65!important;color:#e6e8ff!important;border-radius:12px!important;font-family:inherit!important}
+.answer:hover:not(:disabled){border-color:#a78bfa!important;background:#211c43!important;box-shadow:0 0 18px #8b5cf622!important}
+.answer.correct{border-color:#4ade80!important;background:#10362c!important;color:#eafff4!important;box-shadow:0 0 15px #4ade8030!important}
+.answer.wrong{border-color:#fb7185!important;background:#3b1728!important;color:#fff0f3!important}
+.feedback{background:#0d1225!important;border-color:#424166!important;color:#b9c2e6!important;border-radius:12px!important}
+.feedback.good{border-color:#4ade80!important;color:#86efac!important}.feedback.bad{border-color:#fb7185!important;color:#fda4af!important}
+.primary{background:linear-gradient(115deg,#8b5cf6,#6d28d9)!important;border:1px solid #c4b5fd!important;color:white!important;border-radius:12px!important;box-shadow:0 0 20px #8b5cf633!important}
+.primary:hover{filter:brightness(1.12)}.secondary{border-color:#4c4d79!important;color:#c8c9ed!important;border-radius:12px!important}
+.account-box{background:linear-gradient(145deg,#19152f,#0c1227)!important;border-color:#57478c!important;border-radius:16px!important}
+.account-title{color:#c4b5fd!important}.auth-hint{color:#a6afcf!important}.profile-line{border-color:#48416f!important;color:#dbeafe!important}
+.stat{border-color:#3c3a65!important;background:#11152a;border-radius:12px!important}.stat strong{color:#c4b5fd!important}.stat span{color:#a8b0d0!important}
+#toast{background:#17152f!important;border-color:#a78bfa!important;color:#e9ddff!important;border-radius:12px!important;box-shadow:0 0 20px #7c3aed33!important}
+footer{color:#7d83ae!important;letter-spacing:2px!important}
+button{transition:transform .15s ease,filter .15s ease,box-shadow .15s ease!important}button:active{transform:scale(.98)}
+@media(max-width:520px){body{padding:12px!important}.panel{padding:18px!important}.logo{letter-spacing:4px!important}}
+
+</style>
+</head>
+<body>
+<div id="toast"></div>
+<main class="wrap">
+<header><div class="logo">GLITCH</div><div class="subtitle">CYBER SECURITY TRAINING SIMULATOR</div></header>
+<section id="start" class="panel intro">
+<div class="bigicon">⌁</div>
+<h2>مرحبًا بك في غرفة التدريب</h2>
+<p>اختبر معلوماتك في الأمن السيبراني عبر 100 سؤال. لكل سؤال 3 إجابات، واحدة صحيحة. إذا أخطأت، ستظهر الإجابة الصحيحة مع تفسير مختصر.</p>
+<div class="statgrid">
+<div class="stat"><strong>100</strong><span>سؤال</span></div>
+<div class="stat"><strong>03</strong><span>اختيارات</span></div>
+<div class="stat"><strong>∞</strong><span>محاولة تعلّم</span></div>
+</div>
+<p class="note">معلومة: اللعب يعمل محليًا. تسجيل Google اختياري، ولن يعمل إلا بعد ربط Firebase ونشر اللعبة على HTTPS.</p>
+
+<div class="account-box" id="accountBox">
+  <div class="account-title">◈ GLITCH ID // حساب اللاعب</div>
+  <p id="authStatus" class="note">سجّل الدخول بحساب Google لحفظ هويتك داخل GLITCH.</p>
+  <button id="googleSignInBtn" class="google-btn" type="button">
+    <span class="google-g">G</span> المتابعة باستخدام Google
+  </button>
+  <button id="googleSignOutBtn" class="secondary hidden" type="button">تسجيل الخروج</button>
+  <div id="profileLine" class="profile-line hidden"></div>
+  <p class="auth-hint">تسجيل Google يحتاج إعدادًا مجانيًا مرة واحدة في Firebase بعد رفع اللعبة إلى موقع HTTPS.</p>
+</div>
+
+<button id="startBtn" class="primary" style="width:100%">▶ START TRAINING</button>
+</section>
+
+<section id="game" class="panel hidden">
+<div class="row status"><span><i class="dot"></i>TRAINING MODE // ONLINE</span><span class="pill" id="counter">QUESTION 01 / 100</span></div>
+<div class="row"><span class="pill" id="category">CYBER BASICS</span><span class="pill" id="scoreLabel">النقاط: 0</span></div>
+<div class="progress"><div id="bar"></div></div>
+<h2 id="question"></h2>
+<div id="answers" class="answers"></div>
+<div id="feedback" class="feedback" aria-live="polite">اختر الإجابة التي تراها صحيحة.</div>
+<div class="controls">
+<button id="nextBtn" class="primary" disabled>السؤال التالي ←</button>
+<button id="soundBtn" class="secondary" aria-pressed="true">🔊 الصوت: تشغيل</button>
+</div>
+</section>
+
+<section id="result" class="panel hidden intro">
+<div class="bigicon">✦</div>
+<h2>انتهى التدريب!</h2>
+<p>أكملت جميع الأسئلة. راجع نتيجتك وحاول مرة أخرى لتحسينها.</p>
+<div class="statgrid">
+<div class="stat"><strong id="finalScore">0</strong><span>إجابات صحيحة</span></div>
+<div class="stat"><strong id="percent">0%</strong><span>النتيجة</span></div>
+<div class="stat"><strong>100</strong><span>إجمالي الأسئلة</span></div>
+</div>
+<button id="restartBtn" class="primary" style="width:100%">↻ إعادة اللعب</button>
+</section>
+<footer>GLITCH // LEARN • VERIFY • PROTECT</footer>
+</main>
+<script>
+const questions = [{"q": "ما الهدف من كلمة المرور القوية؟", "a": ["حماية الحساب من التخمين", "تسريع الإنترنت", "زيادة مساحة الهاتف"], "correct": 0, "explain": "اجعلها طويلة وفريدة ولا تعِد استخدامها."}, {"q": "ما المقصود بالمصادقة الثنائية (2FA)؟", "a": ["تسجيل الدخول دون كلمة مرور دائمًا", "خطوة تحقق إضافية بجانب كلمة المرور", "مشاركة الحساب مع شخصين"], "correct": 1, "explain": "تضيف عامل تحقق آخر مثل تطبيق رموز أو مفتاح أمان."}, {"q": "أيّ مما يلي علامة شائعة على التصيّد؟", "a": ["رسالة مستعجلة تطلب بياناتك عبر رابط غريب", "تحديث من متجر التطبيقات الرسمي", "رسالة كتبتها بنفسك"], "correct": 0, "explain": "التصيّد يحاول خداعك لتكشف معلوماتك أو تضغط رابطًا خبيثًا."}, {"q": "هل ينبغي مشاركة رمز التحقق لمرة واحدة؟", "a": ["نعم مع أي شخص يدّعي أنه دعم فني", "فقط في مجموعات الأصدقاء", "لا، احتفظ به لنفسك"], "correct": 2, "explain": "رموز التحقق سرية؛ لا تشاركها مع أحد."}, {"q": "ما أفضل مصدر لتنزيل التطبيقات؟", "a": ["روابط مجهولة في التعليقات", "المتجر الرسمي أو موقع المطوّر الموثوق", "أي ملف APK يصل برسالة"], "correct": 1, "explain": "المصادر الرسمية تقلل المخاطر، لكنها لا تلغيها تمامًا."}, {"q": "ماذا تفعل إذا وصلك مرفق غير متوقع؟", "a": ["تفتحه فورًا", "تعيد إرساله للجميع", "تتحقق من المرسل والسياق قبل فتحه"], "correct": 2, "explain": "تأكد من المرسل عبر وسيلة موثوقة ولا تفتح مرفقات مشبوهة."}, {"q": "ما وظيفة مدير كلمات المرور؟", "a": ["تخزين كلمات المرور وإنشاؤها بأمان", "زيادة سرعة المعالج", "إخفاء كل التطبيقات"], "correct": 0, "explain": "مدير موثوق يساعد على استخدام كلمة مرور فريدة لكل حساب."}, {"q": "ما المقصود بتحديث الأمان؟", "a": ["تغيير خلفية الهاتف", "إصلاح ثغرات وتحسين الحماية", "حذف كل الصور"], "correct": 1, "explain": "التحديثات تسد ثغرات قد يستغلها المهاجمون."}, {"q": "لماذا لا يُنصح باستخدام كلمة المرور نفسها لكل المواقع؟", "a": ["لأنها طويلة دائمًا", "لأنها تستهلك البطارية", "اختراق حساب واحد قد يعرّض حسابات أخرى للخطر"], "correct": 2, "explain": "استخدم كلمات مرور فريدة لكل خدمة."}, {"q": "ماذا يعني HTTPS غالبًا؟", "a": ["أن الاتصال مشفّر بين المتصفح والموقع", "أن الموقع مضمون 100%", "أن الموقع لا يجمع بيانات"], "correct": 0, "explain": "HTTPS يحمي الاتصال، لكنه لا يثبت أن الموقع صادق."}, {"q": "ما المقصود بالبرمجيات الخبيثة؟", "a": ["برنامج للرسم", "برنامج صُمم لإلحاق الضرر أو الوصول غير المصرح", "تحديث رسمي"], "correct": 1, "explain": "قد تسرق البيانات أو تتجسس أو تعطل الجهاز."}, {"q": "ما أفضل تصرف عند ظهور نافذة تقول إن جهازك مصاب واضغط هنا؟", "a": ["تضغط فورًا", "تدخل بياناتك", "تغلقها وتفحص الجهاز بأداة موثوقة"], "correct": 2, "explain": "قد تكون النافذة إعلانًا مخادعًا."}, {"q": "ما فائدة النسخ الاحتياطي؟", "a": ["استعادة الملفات عند فقدانها", "إلغاء الحاجة للتحديثات", "منع كل أنواع الاحتيال"], "correct": 0, "explain": "احتفظ بنسخة منفصلة وآمنة من الملفات المهمة."}, {"q": "ما هو التصيّد الإلكتروني؟", "a": ["طريقة ضغط الملفات", "خداع المستخدم لسرقة معلوماته", "نوع من الشاشات"], "correct": 1, "explain": "غالبًا يأتي عبر بريد أو رسائل أو مواقع مزيفة."}, {"q": "كيف تتحقق من رابط قبل فتحه؟", "a": ["تثق بأي رابط قصير", "تكتب كلمة المرور فيه أولًا", "تفحص اسم النطاق والمرسل وتتجنب الروابط المشبوهة"], "correct": 2, "explain": "تحقق من النطاق بعناية، خصوصًا في الرسائل المستعجلة."}, {"q": "ماذا تفعل إذا استخدمت كلمة مرورك في موقع مزيف؟", "a": ["تغيّرها فورًا من الموقع الرسمي وتراجع الحساب", "تنتظر شهرًا", "ترسلها للدعم في رسالة"], "correct": 0, "explain": "غيّرها من جهاز موثوق، وغيّرها في أي مكان أعدت استخدامها فيه."}, {"q": "ما فائدة قفل الشاشة؟", "a": ["يجعل الهاتف أسرع دائمًا", "يمنع كل الفيروسات", "يحد من وصول الآخرين إلى بياناتك"], "correct": 2, "explain": "استخدم رمزًا قويًا أو وسيلة قفل آمنة."}, {"q": "ما المقصود بالهندسة الاجتماعية؟", "a": ["إقناع الناس بكشف معلومات أو تنفيذ فعل", "إصلاح شبكة Wi-Fi", "ترميز الصور"], "correct": 0, "explain": "تعتمد على التلاعب بالثقة والخوف والاستعجال."}, {"q": "هل شبكة Wi-Fi العامة آمنة دائمًا؟", "a": ["نعم، بلا استثناء", "لا؛ تعامل معها بحذر وتجنب الأعمال الحساسة على شبكة غير موثوقة", "آمنة إذا كان اسمها مشهورًا"], "correct": 1, "explain": "اسم الشبكة وحده لا يثبت أنها شرعية."}, {"q": "ما المقصود بأقل صلاحية؟", "a": ["منح كل التطبيقات صلاحية المدير", "تعطيل كلمة المرور", "منح المستخدم أو التطبيق أقل صلاحيات يحتاجها"], "correct": 2, "explain": "تقليل الصلاحيات يحد من الضرر المحتمل."}, {"q": "ما هو جدار الحماية؟", "a": ["نظام يراقب ويسمح أو يمنع حركة الشبكة وفق قواعد", "برنامج لتعديل الصور", "كابل إنترنت"], "correct": 0, "explain": "يساعد على التحكم في اتصالات الشبكة."}, {"q": "ما المقصود بالتشفير؟", "a": ["حذف البيانات نهائيًا", "تحويل البيانات إلى صيغة لا تُقرأ دون مفتاح مناسب", "ضغط الصور فقط"], "correct": 1, "explain": "التشفير يحمي سرية البيانات عند تطبيقه بشكل صحيح."}, {"q": "ما التصرف الصحيح عند فقدان الهاتف؟", "a": ["تنشر رمز القفل", "تتجاهل الأمر", "تستخدم أدوات العثور والقفل عن بُعد وتؤمّن حساباتك"], "correct": 2, "explain": "اتبع أدوات الشركة ومزوّد الخدمة، وغيّر كلمات المرور عند الحاجة."}, {"q": "لماذا يجب مراجعة أذونات التطبيقات؟", "a": ["للتأكد من أنها مناسبة لوظيفة التطبيق", "لجعل الشاشة أكبر", "لزيادة عدد الإعلانات"], "correct": 0, "explain": "ارفض الأذونات غير الضرورية أو غير المتوقعة."}, {"q": "ما المقصود بملف APK على أندرويد؟", "a": ["ملف تثبيت تطبيق أندرويد", "صورة عالية الدقة", "نوع من كلمات المرور"], "correct": 0, "explain": "ملفات APK من مصادر غير موثوقة قد تكون معدّلة أو ضارة."}, {"q": "ما العلامة التي قد تدل على انتحال هوية؟", "a": ["رسالة من جهة موثقة عبر قناة رسمية", "طلب عاجل للمال أو الأسرار من حساب غير متوقع", "تذكير موعد معروف"], "correct": 1, "explain": "تحقق من الشخص عبر قناة مستقلة قبل الاستجابة."}, {"q": "ما الذي ينبغي فعله قبل بيع هاتفك؟", "a": ["ترك حساباتك مفتوحة", "إرسال رمز القفل للمشتري", "نسخ بياناتك احتياطيًا ثم تسجيل الخروج وإعادة ضبط المصنع"], "correct": 2, "explain": "تأكد من حفظ بياناتك المهمة وإزالة حساباتك وفق إرشادات الشركة."}, {"q": "ما المقصود بالثغرة الأمنية؟", "a": ["ضعف يمكن أن يؤثر في أمان النظام", "نوع من الشاحن", "ميزة للصور"], "correct": 0, "explain": "تُعالج الثغرات عادةً بالتحديثات أو إعدادات تخفيف المخاطر."}, {"q": "ما هو هجوم التخمين على كلمة المرور؟", "a": ["تغيير اسم المستخدم", "تجربة كلمات مرور كثيرة لمحاولة الدخول", "تحديث المتصفح"], "correct": 1, "explain": "كلمات المرور الطويلة والفريدة وحدود المحاولات تساعد في مقاومته."}, {"q": "ما فائدة قفل الحساب بعد محاولات كثيرة؟", "a": ["يزيد سعة التخزين", "يمنع التحديث", "يحد من محاولات التخمين المتكررة"], "correct": 2, "explain": "تستخدم الخدمات ضوابط مختلفة لتقليل محاولات الدخول الآلية."}, {"q": "ما هو برنامج مكافحة البرمجيات الخبيثة؟", "a": ["أداة تساعد على اكتشاف البرمجيات الضارة وإزالتها", "تطبيق للملاحظات", "خدمة بريد"], "correct": 0, "explain": "حدّثه واستخدمه مع تحديث النظام والحذر من الروابط."}, {"q": "ما الذي يجعل رمز QR مشبوهًا؟", "a": ["أنه مربع الشكل", "أن مصدره مجهول ويطلب تسجيل دخول أو دفعًا غير متوقع", "أنه مطبوع على ورق"], "correct": 1, "explain": "تحقق من الوجهة قبل إدخال بيانات أو إجراء دفع."}, {"q": "ما المقصود بسرقة الهوية الرقمية؟", "a": ["إنشاء اسم مستعار للعبة", "تغيير صورة الملف الشخصي", "استخدام شخص آخر لبياناتك أو انتحال شخصيتك"], "correct": 2, "explain": "احمِ معلوماتك الشخصية وتحقق من تنبيهات الحساب."}, {"q": "لماذا يجب إخفاء رموز الاسترداد؟", "a": ["لأن من يحصل عليها قد يستعيد حسابك", "لأنها تستهلك الإنترنت", "لأنها لا تعمل إلا ليلًا"], "correct": 0, "explain": "احتفظ بها في مكان آمن وغير متصل عند الإمكان."}, {"q": "ما التصرف الأفضل مع رسالة تهدد بإغلاق حسابك خلال دقائق؟", "a": ["تضغط رابط الرسالة", "تفتح التطبيق أو الموقع الرسمي وتتحقق من التنبيهات", "ترسل كلمة المرور للمرسل"], "correct": 1, "explain": "الاستعجال والتهديد من أساليب الضغط الشائعة."}, {"q": "ما فائدة تحديث المتصفح؟", "a": ["إزالة الحاجة إلى كلمات المرور", "جعل كل المواقع موثوقة", "إصلاح أخطاء وثغرات وتحسين التوافق"], "correct": 2, "explain": "استخدم إصدارًا مدعومًا ومحدّثًا."}, {"q": "ما هو البريد المزعج (Spam)؟", "a": ["رسائل غير مرغوبة بكميات كبيرة", "نسخة احتياطية", "إعداد شبكة"], "correct": 0, "explain": "لا تتفاعل مع الروابط والمرفقات المشبوهة."}, {"q": "ما المقصود بتسريب البيانات؟", "a": ["حذف صورة من الهاتف", "كشف بيانات لأشخاص غير مخوّلين", "إعادة تسمية ملف"], "correct": 1, "explain": "قد يشمل التسريب كلمات مرور أو معلومات شخصية أو ملفات."}, {"q": "ما الخطوة الأولى إذا لاحظت تسجيل دخول غريبًا لحسابك؟", "a": ["تتجاهل التنبيه", "تنشر بيانات الحساب", "تؤمّن الحساب من الموقع الرسمي وتراجع الجلسات"], "correct": 2, "explain": "غيّر كلمة المرور، وسجّل الخروج من الجلسات المجهولة وفعّل 2FA."}, {"q": "ما هو عنوان IP؟", "a": ["عنوان رقمي يُستخدم للتعرّف على واجهة جهاز في شبكة", "كلمة مرور سرية", "اسم تطبيق"], "correct": 0, "explain": "تساعد عناوين IP في توجيه حركة البيانات عبر الشبكات."}, {"q": "ما المقصود بـ VPN؟", "a": ["برنامج لتعديل الصوت", "شبكة خاصة افتراضية تنشئ اتصالًا مشفرًا إلى نقطة وسيطة", "طريقة لتجاوز كل المخاطر"], "correct": 1, "explain": "VPN لا يجعل كل نشاطك مجهولًا أو كل المواقع آمنة."}, {"q": "هل يكفي VPN لمنع التصيّد؟", "a": ["نعم، دائمًا", "نعم إذا كان مجانيًا", "لا؛ ما زلت بحاجة إلى التحقق من الروابط والرسائل"], "correct": 2, "explain": "VPN لا يمنعك من إدخال بياناتك في موقع مزيف."}, {"q": "ما هو التحديث التلقائي؟", "a": ["تنزيل التحديثات وتثبيتها تلقائيًا وفق الإعدادات", "حذف الحسابات", "تعطيل الإنترنت"], "correct": 0, "explain": "يساعد على وصول إصلاحات الأمان بسرعة."}, {"q": "لماذا لا تنشر تذكرة سفر أو بطاقة هوية كاملة على الإنترنت؟", "a": ["لأن الصور لا تُفتح", "لأنها قد تكشف بيانات شخصية قابلة للاستغلال", "لأنها تقلل دقة الكاميرا"], "correct": 1, "explain": "غطِّ البيانات الحساسة قبل مشاركة أي صورة."}, {"q": "ما هو النسخ الاحتياطي غير المتصل؟", "a": ["نسخة تبقى متصلة بالحساب طوال الوقت", "نسخة تُنشر على شبكة عامة", "نسخة منفصلة عن الجهاز أو الشبكة عند عدم استخدامها"], "correct": 2, "explain": "قد يساعد في استعادة الملفات بعد هجوم فدية."}, {"q": "ما هي برمجيات الفدية؟", "a": ["برمجيات تقفل أو تشفّر الملفات وتطلب فدية", "برنامج لتحرير الفيديو", "خدمة نسخ احتياطي"], "correct": 0, "explain": "لا تضمن الفدية استعادة الملفات؛ الوقاية والنسخ الاحتياطي مهمان."}, {"q": "ما الذي تفعله عند الاشتباه ببرمجية خبيثة على جهاز العمل؟", "a": ["تخفي الأمر", "تتبع إجراءات المؤسسة وتبلغ فريق الدعم أو الأمن", "تنزل أدوات مجهولة"], "correct": 1, "explain": "التبليغ المبكر يساعد على الحد من انتشار المشكلة."}, {"q": "ما المقصود بالتصحيح الأمني (Security Patch)؟", "a": ["ملصق على الجهاز", "خلفية جديدة", "تحديث يعالج مشكلة أو ثغرة أمنية"], "correct": 2, "explain": "ثبت التصحيحات من مصادر رسمية."}, {"q": "ما هو التحقق من المصدر؟", "a": ["التأكد أن الرسالة أو الملف صادر من الجهة المتوقعة", "تغيير لون الشاشة", "زيادة سرعة الشبكة"], "correct": 0, "explain": "يمكن الاتصال بالجهة عبر بيانات اتصال معروفة بدل الرد على الرسالة."}, {"q": "ما أفضل طريقة للتعامل مع سؤال أمني في حسابك؟", "a": ["اختيار إجابة يسهل على الجميع معرفتها", "استخدام إجابة فريدة لا تُستنتج بسهولة وتخزينها بأمان", "نشر الإجابة في ملفك"], "correct": 1, "explain": "أسئلة الأمان قد تكون قابلة للتخمين من معلومات عامة."}, {"q": "ما فائدة تنبيهات تسجيل الدخول؟", "a": ["تمنع كل الهجمات تلقائيًا", "تزيد مساحة الهاتف", "تساعدك على ملاحظة نشاط غير مألوف"], "correct": 2, "explain": "راجع التنبيه من داخل الخدمة الرسمية."}, {"q": "ما هو التلاعب بالروابط (URL spoofing)؟", "a": ["استخدام عنوان يشبه عنوانًا موثوقًا لخداع المستخدم", "تحديث الصفحة", "حفظ موقع في المفضلة"], "correct": 0, "explain": "انتبه للأخطاء الإملائية والنطاقات المشابهة."}, {"q": "هل يمكن أن يكون حساب صديقك مخترقًا؟", "a": ["لا، مستحيل", "نعم، لذا تحقق من الطلبات الغريبة حتى لو جاءت من صديق", "فقط إذا كان حسابه عامًا"], "correct": 1, "explain": "اتصل بصديقك بطريقة أخرى إذا طلب مالًا أو معلومات غير معتادة."}, {"q": "ما معنى البيانات الحساسة؟", "a": ["بيانات لا قيمة لها", "صور خلفيات فقط", "معلومات قد تسبب ضررًا إذا كُشفت مثل كلمات المرور أو الهوية"], "correct": 2, "explain": "تعامل مع بياناتك الشخصية والمالية بحذر."}, {"q": "ما التصرف الآمن عند استخدام كمبيوتر عام؟", "a": ["تجنب حفظ كلمات المرور وسجّل الخروج بعد الانتهاء", "احفظ كل كلمات المرور", "اترك الحساب مفتوحًا"], "correct": 0, "explain": "تجنب العمليات الحساسة على أجهزة لا تتحكم بها."}, {"q": "ما هي جلسة تسجيل الدخول؟", "a": ["ملف موسيقى", "حالة تتيح لك البقاء مسجل الدخول إلى الخدمة", "نسخة من الشاشة"], "correct": 1, "explain": "أنه الجلسات غير المعروفة من إعدادات الأمان."}, {"q": "ما فائدة تسجيل الخروج من الأجهزة القديمة؟", "a": ["يجعل كلمة المرور أقصر", "يمنع تحديث الهاتف", "يقلل فرص الوصول غير المصرح إلى الحساب"], "correct": 2, "explain": "راجع الأجهزة والجلسات النشطة دوريًا."}, {"q": "ما المقصود بالخصوصية الرقمية؟", "a": ["التحكم في كيفية جمع بياناتك واستخدامها ومشاركتها", "إخفاء كل التطبيقات", "تعطيل الشاشة"], "correct": 0, "explain": "راجع إعدادات الخصوصية والأذونات."}, {"q": "لماذا يجب تقييد رؤية منشوراتك الشخصية؟", "a": ["لأن الإنترنت لا يعمل دون ذلك", "لتقليل اطلاع الغرباء على معلوماتك", "لمنع كل الرسائل"], "correct": 1, "explain": "اضبط الجمهور وراجع قائمة الأصدقاء والمتابعين."}, {"q": "ما هي بصمة المتصفح؟", "a": ["بصمة الإصبع على الشاشة", "كلمة مرور المتصفح", "مجموعة خصائص قد تساعد المواقع على تمييز جهازك أو متصفحك"], "correct": 2, "explain": "إعدادات المتصفح والإضافات قد تؤثر في قابلية التمييز."}, {"q": "ما أفضل طريقة لاختيار تطبيق مصباح؟", "a": ["اختيار تطبيق موثوق لا يطلب أذونات غير منطقية", "تثبيت أول ملف مجهول", "منحه كل الصلاحيات"], "correct": 0, "explain": "وظيفة بسيطة لا تحتاج عادةً إلى أذونات كثيرة."}, {"q": "ما المقصود ببرامج التجسس؟", "a": ["أدوات تنظيم الملفات", "برمجيات تجمع معلومات عن المستخدم دون إذن مناسب", "تطبيقات الطقس"], "correct": 1, "explain": "راجع الأذونات واستخدم أدوات حماية موثوقة."}, {"q": "ما التصرف الصحيح عند طلب تطبيق صلاحية الميكروفون دون سبب واضح؟", "a": ["توافق دائمًا", "تعطل قفل الشاشة", "ترفض الصلاحية أو تبحث عن بديل موثوق"], "correct": 2, "explain": "امنح الأذونات فقط عندما تكون ضرورية ومفهومة."}, {"q": "ما الذي يميز صفحة تسجيل دخول مزيفة؟", "a": ["قد تستخدم عنوانًا قريبًا من الرسمي وتطلب بياناتك", "أنها تحتوي على شعار", "أن ألوانها زاهية"], "correct": 0, "explain": "الشعار وحده لا يثبت أصالة الصفحة."}, {"q": "ما هي المصادقة البيومترية؟", "a": ["الدخول باسم مستعار", "التحقق بصفة جسدية مثل البصمة أو الوجه", "إعادة ضبط المصنع"], "correct": 1, "explain": "استخدمها ضمن إعدادات حماية موثوقة، مع وسيلة احتياطية آمنة."}, {"q": "ما هو مفتاح الأمان المادي؟", "a": ["كابل شحن عادي", "بطاقة ذاكرة", "جهاز مادي يُستخدم للتحقق من الهوية"], "correct": 2, "explain": "مفاتيح الأمان قد توفر مقاومة قوية للتصيّد عند دعمها."}, {"q": "ما هو مبدأ الثقة الصفرية (Zero Trust)؟", "a": ["التحقق من كل طلب وصول بدل الثقة التلقائية", "الثقة بكل جهاز داخل الشبكة", "تعطيل كلمات المرور"], "correct": 0, "explain": "التحقق المستمر والصلاحيات المحدودة من مبادئه."}, {"q": "ما المقصود بإدارة التصحيحات؟", "a": ["تصميم الشعارات", "متابعة التحديثات الأمنية وتطبيقها على الأنظمة", "حذف المستخدمين"], "correct": 1, "explain": "تساعد على تقليل التعرض للثغرات المعروفة."}, {"q": "ما معنى التشفير من طرف إلى طرف؟", "a": ["أن مزود الإنترنت يقرأ كل شيء", "أن الرسائل تُحذف تلقائيًا", "أن المحتوى يُشفّر بحيث لا يقرأه عادةً إلا طرفا الاتصال"], "correct": 2, "explain": "تعتمد الحماية على التنفيذ وإدارة المفاتيح والأجهزة."}, {"q": "هل الرسالة المشفّرة تعني أن المرسل موثوق؟", "a": ["لا؛ التشفير لا يثبت أن الشخص صادق", "نعم دائمًا", "نعم إذا كانت الرسالة قصيرة"], "correct": 0, "explain": "قد يستخدم المحتالون خدمات مشفّرة أيضًا."}, {"q": "ما المقصود بالتحقق من سلامة الملف؟", "a": ["تغيير اسم الملف", "مقارنة قيمة تحقق موثوقة مثل hash عند الحاجة", "فتح الملف لمعرفة شكله"], "correct": 1, "explain": "قيمة التجزئة تساعد على معرفة إن كان الملف تغير، إذا قارنتها بمصدر موثوق."}, {"q": "ما هي قيمة التجزئة (Hash)؟", "a": ["كلمة مرور يمكن استرجاعها دائمًا", "عنوان IP", "ناتج ثابت الطول يُحسب من بيانات ويُستخدم للمقارنة والتحقق"], "correct": 2, "explain": "دوال التجزئة التشفيرية مصممة لخصائص مثل مقاومة التصادم."}, {"q": "ما هو اختبار الاختراق الأخلاقي؟", "a": ["فحص أمني مصرح به لاكتشاف نقاط الضعف", "الدخول إلى أي حساب", "تجربة كلمات مرور على الغرباء"], "correct": 0, "explain": "يجب أن يكون ضمن نطاق وإذن واضحين."}, {"q": "ما الشرط الأساسي لاختبار أمان موقع؟", "a": ["أن يكون الموقع مشهورًا", "الحصول على إذن صريح والعمل ضمن النطاق المسموح", "إخفاء النشاط عن المالك"], "correct": 1, "explain": "لا تختبر أنظمة لا تملكها أو لا تملك تصريحًا لاختبارها."}, {"q": "ما هو التصرف الصحيح إذا اكتشفت ثغرة في موقع؟", "a": ["تنشر بيانات المستخدمين", "تستغلها للحصول على المال", "تبلغ المالك عبر قناة إفصاح مسؤولة دون استغلالها"], "correct": 2, "explain": "الإبلاغ المسؤول يحمي المستخدمين ويتيح معالجة المشكلة."}, {"q": "ما معنى الهندسة الاجتماعية عبر الهاتف (Vishing)؟", "a": ["احتيال صوتي عبر المكالمات", "تحديث نظام", "نسخ ملف"], "correct": 0, "explain": "لا تكشف رموزًا أو بيانات لمتصل غير متحقق منه."}, {"q": "ما معنى التصيّد عبر الرسائل النصية (Smishing)؟", "a": ["تشفير الرسائل", "رسائل نصية احتيالية تهدف لخداعك", "نسخ جهات الاتصال"], "correct": 1, "explain": "تحقق من الروابط والطلبات عبر القنوات الرسمية."}, {"q": "ما الذي يجب فعله عند تلقي رمز دخول لم تطلبه؟", "a": ["إرساله للمتصل", "نشره في المجموعة", "عدم مشاركته والتحقق من أمان الحساب"], "correct": 2, "explain": "قد يعني أن شخصًا يحاول تسجيل الدخول إلى حسابك."}, {"q": "ما فائدة عبارة مرور طويلة؟", "a": ["قد تكون أصعب على التخمين وأسهل للحفظ إذا كانت فريدة", "تعمل بدل التحديثات", "تمنع كل البرمجيات الخبيثة"], "correct": 0, "explain": "استخدم عبارة طويلة وفريدة ولا تشاركها."}, {"q": "ما المقصود بهجوم حجب الخدمة (DoS)؟", "a": ["تنظيف الخادم", "إغراق خدمة بالطلبات لتعطيل وصول المستخدمين", "تحديث قاعدة بيانات"], "correct": 1, "explain": "الهدف عادةً تقليل توافر الخدمة."}, {"q": "ما المقصود بهجوم حجب الخدمة الموزع (DDoS)؟", "a": ["هجوم من جهاز واحد فقط دائمًا", "نوع من النسخ الاحتياطي", "هجوم يستخدم مصادر عديدة لإغراق خدمة"], "correct": 2, "explain": "تحتاج المؤسسات إلى وسائل رصد وتخفيف مناسبة."}, {"q": "ما هو سجل الأحداث الأمني؟", "a": ["سجل يوثّق نشاطًا وأحداثًا في النظام", "قائمة مشتريات", "خلفية سطح المكتب"], "correct": 0, "explain": "يساعد على التحقيق وفهم ما حدث."}, {"q": "لماذا يُعد الوقت الصحيح على الأجهزة مهمًا للسجلات؟", "a": ["لأنه يغير لون الشاشة", "يساعد على ترتيب الأحداث والتحقيق فيها", "يمنع جميع الهجمات"], "correct": 1, "explain": "توحيد الوقت يجعل مقارنة الأحداث أسهل."}, {"q": "ما هو التصنيف الأمني للبيانات؟", "a": ["اختيار خط الكتابة", "ضغط الملفات", "تحديد مستوى الحساسية وطريقة التعامل المناسبة"], "correct": 2, "explain": "قد تختلف الضوابط المطلوبة بحسب حساسية البيانات."}, {"q": "ما التصرف المناسب مع USB مجهول وجدته؟", "a": ["لا توصله بجهازك؛ سلّمه للمسؤول المناسب", "توصله فورًا", "تنسخ ملفاته"], "correct": 0, "explain": "قد تحتوي وسائط مجهولة على ملفات ضارة."}, {"q": "ما فائدة تعطيل Bluetooth عند عدم الحاجة إليه؟", "a": ["يجعل كل التطبيقات أسرع", "يقلل الاتصالات غير الضرورية والتعرض المحتمل", "يمنع التصيّد بالبريد"], "correct": 1, "explain": "أبقِ الاتصالات التي لا تحتاجها مغلقة."}, {"q": "ما المقصود بتقليل سطح الهجوم؟", "a": ["زيادة عدد التطبيقات", "مشاركة الحسابات", "إيقاف الخدمات والأذونات غير اللازمة وتقليل نقاط الدخول"], "correct": 2, "explain": "كل خدمة غير ضرورية قد تزيد فرص التعرض للمخاطر."}, {"q": "ما هو التكوين الآمن الافتراضي؟", "a": ["إعدادات تبدأ بأمان مع تعطيل ما لا يلزم", "كلمة مرور فارغة", "السماح بكل الاتصالات"], "correct": 0, "explain": "غيّر كلمات المرور الافتراضية وراجع الإعدادات."}, {"q": "لماذا تُعد كلمات المرور الافتراضية خطرة؟", "a": ["لأنها لا تعمل على الهواتف", "قد تكون معروفة أو سهلة التخمين", "لأنها مشفرة دائمًا"], "correct": 1, "explain": "غيّر بيانات الدخول الافتراضية عند إعداد الجهاز."}, {"q": "ما معنى الاستجابة للحوادث الأمنية؟", "a": ["إخفاء التنبيهات", "إيقاف كل الأجهزة إلى الأبد", "خطة لاكتشاف الحادث واحتوائه والتعافي منه"], "correct": 2, "explain": "التحضير المسبق يساعد على تقليل الضرر."}, {"q": "ما الخطوة المفيدة بعد استعادة حساب مخترق؟", "a": ["مراجعة النشاط والأجهزة وتفعيل حماية إضافية", "استخدام كلمة المرور القديمة نفسها في كل مكان", "تجاهل التنبيهات"], "correct": 0, "explain": "راجع البريد ورقم الاسترداد والجلسات والتطبيقات المتصلة."}, {"q": "ما المقصود بمخاطر الطرف الثالث؟", "a": ["مخاطر الطقس", "مخاطر قد تأتي من مورد أو خدمة خارجية", "مخاطر نفاد البطارية فقط"], "correct": 1, "explain": "تحقق من موثوقية الخدمات والأذونات التي تمنحها."}, {"q": "ما هي سياسة الخصوصية؟", "a": ["قائمة الألعاب", "طريقة تغيير كلمة المرور", "وثيقة توضّح كيفية جمع البيانات واستخدامها ومشاركتها"], "correct": 2, "explain": "اقرأ البنود المهمة قبل منح بياناتك أو موافقتك."}, {"q": "ما هو التصنيف الصحيح للمعلومات العامة؟", "a": ["معلومات مصرح بنشرها للجمهور", "كلمات مرور الموظفين", "مفاتيح التشفير السرية"], "correct": 0, "explain": "حتى المعلومات العامة يجب أن تُنشر بموافقة مناسبة."}, {"q": "ما معنى إخفاء البيانات (Data masking)؟", "a": ["حذف الإنترنت", "إظهار نسخة مخفية أو معدلة من بيانات حساسة في سياقات معينة", "تغيير كلمة المرور"], "correct": 1, "explain": "يُستخدم لتقليل كشف المعلومات الحقيقية عند الحاجة."}, {"q": "ما فائدة إتلاف البيانات بشكل آمن؟", "a": ["زيادة مساحة الإنترنت", "تسريع لوحة المفاتيح", "تقليل إمكانية استرجاع بيانات حساسة من وسيط قديم"], "correct": 2, "explain": "اتبع طريقة مناسبة لنوع الوسيط وحساسية البيانات."}, {"q": "ما التصرف الأفضل عند مشاركة شاشة في اجتماع؟", "a": ["إغلاق الإشعارات وإخفاء المعلومات الحساسة", "عرض كلمات المرور", "فتح ملفات شخصية غير لازمة"], "correct": 0, "explain": "شارك النافذة المطلوبة فقط عندما يكون ذلك متاحًا."}, {"q": "ما هو احتيال الدعم الفني؟", "a": ["رسالة تحديث رسمية فقط", "شخص يتظاهر بأنه دعم فني ليطلب وصولًا أو مالًا", "طريقة نسخ احتياطي"], "correct": 1, "explain": "تواصل مع الدعم عبر الموقع أو التطبيق الرسمي ولا تمنح تحكمًا عن بعد لمجهول."}, {"q": "ما علامة التطبيق المقلّد؟", "a": ["وجود وصف واضح", "أنه من المتجر الرسمي بالضرورة", "اسم أو ناشر غير متوقع وأذونات أو سلوك مريب"], "correct": 2, "explain": "تحقق من اسم المطوّر والمراجعات والأذونات والمصدر."}, {"q": "ما معنى مبدأ الحاجة إلى المعرفة؟", "a": ["الوصول للمعلومات اللازمة للعمل فقط", "إتاحة كل الملفات للجميع", "حذف السجلات"], "correct": 0, "explain": "يحد من اطلاع الأشخاص على بيانات لا يحتاجونها."}];
+let index=0, score=0, locked=false, soundOn=true, audioCtx=null;
+const $=id=>document.getElementById(id);
+function tone(freq,duration,type="sine",volume=.045){
+  if(!soundOn)return;
+  try{
+    audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();
+    if(audioCtx.state==="suspended")audioCtx.resume();
+    const osc=audioCtx.createOscillator(), gain=audioCtx.createGain();
+    osc.type=type;osc.frequency.value=freq;gain.gain.value=volume;
+    osc.connect(gain);gain.connect(audioCtx.destination);
+    gain.gain.setTargetAtTime(.0001,audioCtx.currentTime+duration/1000*.65,.04);
+    osc.start();osc.stop(audioCtx.currentTime+duration/1000);
+  }catch(e){}
+}
+function sound(kind){
+  if(!soundOn)return;
+  if(kind==="good"){
+    tone(523,90,"sine",.045);setTimeout(()=>tone(659,100,"triangle",.045),75);setTimeout(()=>tone(784,145,"sine",.04),155);
+  }else if(kind==="bad"){
+    tone(260,95,"triangle",.035);setTimeout(()=>tone(195,150,"sawtooth",.022),85);
+  }else if(kind==="click"){
+    tone(540,35,"square",.012);setTimeout(()=>tone(810,45,"sine",.012),28);
+  }else if(kind==="win"){
+    tone(392,110,"sine",.04);setTimeout(()=>tone(523,110,"sine",.04),100);setTimeout(()=>tone(659,120,"triangle",.04),200);setTimeout(()=>tone(784,190,"sine",.04),310);
+  }
+}
+function toast(text){$("toast").textContent=text;$("toast").classList.add("show");setTimeout(()=>$("toast").classList.remove("show"),1200)}
+function start(){index=0;score=0;locked=false;$("start").classList.add("hidden");$("result").classList.add("hidden");$("game").classList.remove("hidden");render();sound("click")}
+function render(){
+ locked=false;
+ const item=questions[index];
+ $("counter").textContent=`QUESTION ${String(index+1).padStart(2,"0")} / ${questions.length}`;
+ $("scoreLabel").textContent=`النقاط: ${score}`;
+ $("bar").style.width=`${index/questions.length*100}%`;
+ $("question").textContent=item.q;
+ $("feedback").className="feedback";
+ $("feedback").textContent="اختر الإجابة التي تراها صحيحة.";
+ $("nextBtn").disabled=true;
+ $("nextBtn").textContent=index===questions.length-1?"عرض النتيجة ←":"السؤال التالي ←";
+ const box=$("answers");box.innerHTML="";
+ item.a.forEach((answer,i)=>{
+   const btn=document.createElement("button");
+   btn.className="answer";
+   btn.textContent=`${["A","B","C"][i]}  //  ${answer}`;
+   btn.addEventListener("click",()=>choose(i,btn));
+   box.appendChild(btn);
+ });
+}
+function choose(choice,clicked){
+ if(locked)return;
+ locked=true;
+ const item=questions[index], buttons=[...$("answers").querySelectorAll("button")];
+ buttons.forEach((b,i)=>{b.disabled=true;if(i===item.correct)b.classList.add("correct")});
+ const fb=$("feedback");
+ if(choice===item.correct){
+   score++;clicked.classList.add("correct");fb.className="feedback good";
+   fb.textContent="✓ إجابة صحيحة! "+item.explain;
+   document.body.classList.remove("flash");void document.body.offsetWidth;document.body.classList.add("flash");
+   sound("good");toast("ACCESS GRANTED // +1 POINT");
+ }else{
+   clicked.classList.add("wrong");fb.className="feedback bad";
+   fb.textContent="✕ إجابة خاطئة. الإجابة الصحيحة: "+item.a[item.correct]+". "+item.explain;
+   sound("bad");toast("ACCESS DENIED // راجع الإجابة الصحيحة");
+ }
+ $("scoreLabel").textContent=`النقاط: ${score}`;
+ $("bar").style.width=`${(index+1)/questions.length*100}%`;
+ $("nextBtn").disabled=false;
+}
+function next(){
+ if(!locked)return;
+ if(index<questions.length-1){index++;render();sound("click")}
+ else finish();
+}
+function finish(){
+ $("game").classList.add("hidden");$("result").classList.remove("hidden");
+ $("finalScore").textContent=score;
+ $("percent").textContent=Math.round(score/questions.length*100)+"%";
+ $("bar").style.width="100%";sound("win");
+}
+$("startBtn").addEventListener("click",start);
+$("nextBtn").addEventListener("click",next);
+$("restartBtn").addEventListener("click",start);
+$("soundBtn").addEventListener("click",()=>{
+ soundOn=!soundOn;
+ $("soundBtn").textContent=soundOn?"🔊 الصوت: تشغيل":"🔇 الصوت: إيقاف";
+ $("soundBtn").setAttribute("aria-pressed",String(soundOn));
+ if(soundOn)sound("click");
+});
+</script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+import {
+  getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut
+} from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+
+/*
+  SETUP REQUIRED:
+  1) Create a project at https://console.firebase.google.com/
+  2) Add a Web App and paste its config below.
+  3) Authentication > Sign-in method > enable Google.
+  4) Authentication > Settings > Authorized domains: add the domain hosting this game.
+  5) Host this page on HTTPS (for example GitHub Pages).
+  Until this config is filled in, Google sign-in will show a setup message.
+*/
+const firebaseConfig = {
+  apiKey: "PASTE_YOUR_FIREBASE_API_KEY_HERE",
+  authDomain: "PASTE_YOUR_PROJECT_ID_HERE.firebaseapp.com",
+  projectId: "PASTE_YOUR_PROJECT_ID_HERE",
+  appId: "PASTE_YOUR_FIREBASE_APP_ID_HERE"
+};
+
+const signInBtn = document.getElementById("googleSignInBtn");
+const signOutBtn = document.getElementById("googleSignOutBtn");
+const statusEl = document.getElementById("authStatus");
+const profileLine = document.getElementById("profileLine");
+let auth = null;
+
+const configReady = !Object.values(firebaseConfig).some(v => v.startsWith("PASTE_"));
+
+function showStatus(message) {
+  statusEl.textContent = message;
+}
+
+if (!configReady) {
+  signInBtn.addEventListener("click", () => {
+    showStatus("زر Google جاهز، لكن يلزم ربط Firebase أولًا. افتح تعليمات الإعداد داخل ملف المشروع.");
+  });
+} else {
+  try {
+    const app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: "select_account" });
+
+    signInBtn.addEventListener("click", async () => {
+      signInBtn.disabled = true;
+      showStatus("جارٍ فتح تسجيل الدخول من Google…");
+      try {
+        await signInWithPopup(auth, provider);
+      } catch (error) {
+        showStatus(error.code === "auth/popup-closed-by-user"
+          ? "أُغلق تسجيل الدخول قبل اكتماله."
+          : "تعذّر تسجيل الدخول. تأكد من تفعيل Google وإضافة نطاق الموقع في Firebase.");
+      } finally {
+        signInBtn.disabled = false;
+      }
+    });
+
+    signOutBtn.addEventListener("click", async () => {
+      try { await signOut(auth); } catch (_) { showStatus("تعذّر تسجيل الخروج؛ حاول مرة أخرى."); }
+    });
+
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        showStatus("تم تسجيل الدخول بحساب Google.");
+        profileLine.textContent = "PLAYER: " + (user.displayName || "GLITCH PLAYER") +
+          (user.email ? " • " + user.email : "");
+        profileLine.classList.remove("hidden");
+        signInBtn.classList.add("hidden");
+        signOutBtn.classList.remove("hidden");
+      } else {
+        showStatus("سجّل الدخول بحساب Google لحفظ هويتك داخل GLITCH.");
+        profileLine.classList.add("hidden");
+        signInBtn.classList.remove("hidden");
+        signOutBtn.classList.add("hidden");
+      }
+    });
+  } catch (_) {
+    showStatus("إعداد Firebase غير مكتمل. راجع إعدادات الربط في هذا الملف.");
+  }
+}
+</script>
+
+</body>
+</html>
