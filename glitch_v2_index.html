@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#020805">
+<title>GLITCH // Secure Access</title>
+<style>
+:root{--green:#39ff88;--dim:#16884b;--bg:#020805;--panel:#06130b;--red:#ff4d6d}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(ellipse at top,#082012 0%,#020805 55%);color:var(--green);font-family:Consolas,Monaco,monospace;display:flex;align-items:center;justify-content:center;padding:20px;overflow-x:hidden}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent 0 3px,rgba(57,255,136,.035) 4px);z-index:3}
+.wrap{width:100%;max-width:440px}
+.top{text-align:center;margin-bottom:22px}
+.logo{font-size:clamp(38px,12vw,56px);font-weight:900;letter-spacing:8px;text-shadow:0 0 10px var(--green),0 0 25px #0b8e4a;animation:flicker 4s infinite}
+.sub{font-size:11px;letter-spacing:3px;color:#72c995;margin-top:7px}
+.panel{border:1px solid var(--dim);background:rgba(3,14,8,.94);padding:22px;border-radius:8px;box-shadow:0 0 25px #063b1b55,inset 0 0 22px #063b1b22}
+.status{display:flex;justify-content:space-between;font-size:10px;color:#73bd8f;border-bottom:1px solid #174e2c;padding-bottom:12px;margin-bottom:18px}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 9px var(--green);margin-right:6px}
+h2{font-size:16px;letter-spacing:2px;margin:0 0 8px}
+p{font-size:12px;color:#8bb99a;line-height:1.7}
+label{display:block;font-size:11px;margin:20px 0 8px;color:#a4e9ba}
+input{width:100%;background:#010502;border:1px solid #176b37;color:var(--green);padding:14px;border-radius:4px;font:inherit;outline:none}
+input:focus{border-color:var(--green);box-shadow:0 0 12px #1b9e51}
+button{width:100%;padding:13px;border:1px solid var(--green);background:#0a2a16;color:var(--green);font:inherit;font-weight:bold;letter-spacing:2px;border-radius:4px;margin-top:13px;cursor:pointer}
+button:active{background:var(--green);color:#001b0a}
+.smallbtn{background:transparent;border-color:#22653a;color:#8dd9a8;font-size:11px}
+.msg{min-height:20px;font-size:11px;margin-top:12px;color:var(--red)}
+.hidden{display:none!important}
+.terminal{background:#010402;border:1px solid #174e2c;padding:12px;margin-top:16px;min-height:100px;font-size:11px;line-height:1.9;color:#85dca2;white-space:pre-wrap}
+.green{color:var(--green)}
+.badge{display:inline-block;border:1px solid #237544;padding:4px 7px;font-size:10px;margin:5px 5px 0 0}
+footer{text-align:center;font-size:10px;color:#39734c;margin-top:18px}
+@keyframes flicker{0%,96%,98%,100%{opacity:1}97%{opacity:.7}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="top">
+    <div class="logo">GLITCH</div>
+    <div class="sub">UNAUTHORIZED ACCESS IS A GAME</div>
+  </header>
+
+  <section id="login" class="panel">
+    <div class="status"><span><i class="dot"></i>SYSTEM ONLINE</span><span>v2.0.4</span></div>
+    <h2>IDENTITY CHECK</h2>
+    <p>أدخل كلمة المرور لفتح الغرفة السرية.</p>
+    <form id="loginForm">
+      <label for="password">ACCESS KEY //</label>
+      <input id="password" type="password" placeholder="Enter access key..." autocomplete="off" required>
+      <button type="submit">AUTHORIZE ACCESS</button>
+    </form>
+    <div id="loginMsg" class="msg" role="status"></div>
+    <button id="hintBtn" class="smallbtn" type="button">SHOW PASSWORD HINT</button>
+    <div id="hint" class="terminal hidden">HINT: The demo password is written in the setup instructions.</div>
+    <div class="terminal" id="boot">> GLITCH security module loaded
+> Waiting for credentials...
+> <span class="green">ACCESS LOCKED</span></div>
+  </section>
+
+  <section id="vault" class="panel hidden">
+    <div class="status"><span><i class="dot"></i>ACCESS GRANTED</span><span>LEVEL 01</span></div>
+    <h2>WELCOME, OPERATOR.</h2>
+    <p>تم فتح الغرفة السرية. استكشف الرسائل وحل اللغز للوصول إلى الرسالة المخفية.</p>
+    <span class="badge">ENCRYPTED ROOM</span><span class="badge">LOCAL SESSION</span>
+    <div id="logs" class="terminal">> Identity verified.
+> Secure room unlocked.
+> New mission received...</div>
+    <h2 style="margin-top:20px">MISSION 001</h2>
+    <p>أنا رقم، إذا ضربتني في نفسي كان الناتج 64. ما أنا؟</p>
+    <label for="answer">YOUR ANSWER //</label>
+    <input id="answer" type="number" placeholder="Enter number...">
+    <button id="checkBtn" type="button">SUBMIT ANSWER</button>
+    <div id="puzzleMsg" class="msg" role="status"></div>
+    <div id="secret" class="terminal hidden">> SECRET MESSAGE UNLOCKED
+> أحيانًا، أصغر خطأ يفتح أكبر باب.
+> END OF TRANSMISSION.</div>
+    <button id="logoutBtn" class="smallbtn" type="button">LOCK SYSTEM / LOG OUT</button>
+  </section>
+  <footer>GLITCH // FICTIONAL TERMINAL EXPERIENCE</footer>
+</main>
+<script>
+/* هذه كلمة مرور تجريبية داخل لعبة محلية فقط وليست حماية حقيقية. */
+const DEMO_PASSWORD = "GLITCH2026";
+const login = document.getElementById("login");
+const vault = document.getElementById("vault");
+const password = document.getElementById("password");
+const loginMsg = document.getElementById("loginMsg");
+const hint = document.getElementById("hint");
+const boot = document.getElementById("boot");
+const logs = document.getElementById("logs");
+
+document.getElementById("loginForm").addEventListener("submit", function(event) {
+  event.preventDefault();
+  if (password.value === DEMO_PASSWORD) {
+    loginMsg.textContent = "";
+    login.classList.add("hidden");
+    vault.classList.remove("hidden");
+    logs.textContent += "\n> Session started locally.\n> Operator status: ACTIVE";
+  } else {
+    loginMsg.textContent = "ACCESS DENIED // كلمة المرور غير صحيحة";
+    boot.textContent = "> Authentication failed.\n> ACCESS LOCKED";
+    password.value = "";
+    password.focus();
+  }
+});
+
+document.getElementById("hintBtn").addEventListener("click", function() {
+  hint.classList.toggle("hidden");
+});
+
+document.getElementById("checkBtn").addEventListener("click", function() {
+  const answer = document.getElementById("answer").value.trim();
+  const puzzleMsg = document.getElementById("puzzleMsg");
+  if (answer === "8" || answer === "-8") {
+    puzzleMsg.style.color = "var(--green)";
+    puzzleMsg.textContent = "CORRECT // تم فتح الرسالة السرية";
+    document.getElementById("secret").classList.remove("hidden");
+  } else {
+    puzzleMsg.style.color = "var(--red)";
+    puzzleMsg.textContent = "INCORRECT // حاول مرة أخرى";
+  }
+});
+
+document.getElementById("logoutBtn").addEventListener("click", function() {
+  vault.classList.add("hidden");
+  login.classList.remove("hidden");
+  password.value = "";
+  document.getElementById("answer").value = "";
+  document.getElementById("secret").classList.add("hidden");
+  document.getElementById("puzzleMsg").textContent = "";
+  password.focus();
+});
+</script>
+</body>
+</html>
